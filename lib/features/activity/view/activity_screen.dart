@@ -53,7 +53,7 @@ class ActivityScreen extends StatelessWidget {
                           const SizedBox(height: 16),
                           _PulseLineCard(data: loaded.activityList),
                           const SizedBox(height: 16),
-                          _AddActivityCard(),
+                          const _AddActivityCard(),
                           const SizedBox(height: 24),
                         ],
                       ),
@@ -77,6 +77,7 @@ class _HealthScoreGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = score >= 70 ? AppTheme.emerald : score >= 40 ? AppTheme.amber : AppTheme.ruby;
     return LiquidGlassCard(
+      useBlur: true,
       borderRadius: 24,
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -85,25 +86,27 @@ class _HealthScoreGauge extends StatelessWidget {
           const SizedBox(height: 16),
           SizedBox(
             height: 140,
-            child: PieChart(
-              PieChartData(
-                startDegreeOffset: 180,
-                sectionsSpace: 0,
-                centerSpaceRadius: 50,
-                sections: [
-                  PieChartSectionData(
-                    value: score,
-                    color: color,
-                    radius: 20,
-                    showTitle: false,
-                  ),
-                  PieChartSectionData(
-                    value: 100 - score,
-                    color: Colors.white12,
-                    radius: 20,
-                    showTitle: false,
-                  ),
-                ],
+            child: RepaintBoundary(
+              child: PieChart(
+                PieChartData(
+                  startDegreeOffset: 180,
+                  sectionsSpace: 0,
+                  centerSpaceRadius: 50,
+                  sections: [
+                    PieChartSectionData(
+                      value: score,
+                      color: color,
+                      radius: 20,
+                      showTitle: false,
+                    ),
+                    PieChartSectionData(
+                      value: 100 - score,
+                      color: Colors.white12,
+                      radius: 20,
+                      showTitle: false,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -189,35 +192,37 @@ class _StepsBarChart extends StatelessWidget {
             height: 140,
             child: reversed.isEmpty
                 ? const Center(child: Text('Нет данных', style: TextStyle(color: Colors.white38)))
-                : BarChart(
-                    BarChartData(
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        getDrawingHorizontalLine: (_) => FlLine(color: Colors.white.withOpacity(0.05), strokeWidth: 1),
+                : RepaintBoundary(
+                    child: BarChart(
+                      BarChartData(
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          getDrawingHorizontalLine: (_) => FlLine(color: Colors.white.withOpacity(0.05), strokeWidth: 1),
+                        ),
+                        borderData: FlBorderData(show: false),
+                        titlesData: const FlTitlesData(
+                          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        ),
+                        barGroups: reversed.asMap().entries.map((e) {
+                          final isGoal = e.value.steps >= 8000;
+                          return BarChartGroupData(
+                            x: e.key,
+                            barRods: [
+                              BarChartRodData(
+                                toY: e.value.steps.toDouble(),
+                                color: isGoal ? AppTheme.aquamarine : AppTheme.indigo.withOpacity(0.6),
+                                width: 14,
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                        maxY: 12000,
                       ),
-                      borderData: FlBorderData(show: false),
-                      titlesData: const FlTitlesData(
-                        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      ),
-                      barGroups: reversed.asMap().entries.map((e) {
-                        final isGoal = e.value.steps >= 8000;
-                        return BarChartGroupData(
-                          x: e.key,
-                          barRods: [
-                            BarChartRodData(
-                              toY: e.value.steps.toDouble(),
-                              color: isGoal ? AppTheme.aquamarine : AppTheme.indigo.withOpacity(0.6),
-                              width: 14,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                      maxY: 12000,
                     ),
                   ),
           ),
@@ -258,33 +263,35 @@ class _PulseLineCard extends StatelessWidget {
             height: 100,
             child: reversed.isEmpty
                 ? const Center(child: Text('Нет данных', style: TextStyle(color: Colors.white38)))
-                : LineChart(
-                    LineChartData(
-                      gridData: const FlGridData(show: false),
-                      borderData: FlBorderData(show: false),
-                      titlesData: const FlTitlesData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: reversed.asMap().entries
-                              .map((e) => FlSpot(e.key.toDouble(), e.value.pulse.toDouble()))
-                              .toList(),
-                          isCurved: true,
-                          color: AppTheme.coral,
-                          barWidth: 2.5,
-                          dotData: FlDotData(
-                            show: true,
-                            getDotPainter: (_, __, ___, ____) => FlDotCirclePainter(
-                              radius: 3,
-                              color: AppTheme.coral,
-                              strokeWidth: 0,
+                : RepaintBoundary(
+                    child: LineChart(
+                      LineChartData(
+                        gridData: const FlGridData(show: false),
+                        borderData: FlBorderData(show: false),
+                        titlesData: const FlTitlesData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: reversed.asMap().entries
+                                .map((e) => FlSpot(e.key.toDouble(), e.value.pulse.toDouble()))
+                                .toList(),
+                            isCurved: true,
+                            color: AppTheme.coral,
+                            barWidth: 2.5,
+                            dotData: FlDotData(
+                              show: true,
+                              getDotPainter: (_, __, ___, ____) => FlDotCirclePainter(
+                                radius: 3,
+                                color: AppTheme.coral,
+                                strokeWidth: 0,
+                              ),
+                            ),
+                            belowBarData: BarAreaData(
+                              show: true,
+                              color: AppTheme.coral.withOpacity(0.1),
                             ),
                           ),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: AppTheme.coral.withOpacity(0.1),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
           ),
@@ -295,6 +302,8 @@ class _PulseLineCard extends StatelessWidget {
 }
 
 class _AddActivityCard extends StatefulWidget {
+  const _AddActivityCard({super.key});
+
   @override
   State<_AddActivityCard> createState() => _AddActivityCardState();
 }

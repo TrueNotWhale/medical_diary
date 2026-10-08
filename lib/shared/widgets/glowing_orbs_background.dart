@@ -12,37 +12,44 @@ class GlowingOrbsBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Base dark gradient
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppTheme.bgDark,
-                AppTheme.bgDeep,
-                Color(0xFF070B17),
-              ],
-            ),
+        RepaintBoundary(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Base dark gradient
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppTheme.bgDark,
+                      AppTheme.bgDeep,
+                      Color(0xFF070B17),
+                    ],
+                  ),
+                ),
+              ),
+              // Aquamarine orb – top left
+              const Positioned(
+                top: -80,
+                left: -60,
+                child: _Orb(color: AppTheme.aquamarine, size: 280),
+              ),
+              // Indigo orb – centre right
+              const Positioned(
+                top: 200,
+                right: -100,
+                child: _Orb(color: AppTheme.indigo, size: 260),
+              ),
+              // Coral orb – bottom
+              const Positioned(
+                bottom: -80,
+                left: 80,
+                child: _Orb(color: AppTheme.coral, size: 220),
+              ),
+            ],
           ),
-        ),
-        // Aquamarine orb – top left
-        Positioned(
-          top: -80,
-          left: -60,
-          child: _Orb(color: AppTheme.aquamarine, size: 280),
-        ),
-        // Indigo orb – centre right
-        Positioned(
-          top: 200,
-          right: -100,
-          child: _Orb(color: AppTheme.indigo, size: 260),
-        ),
-        // Coral orb – bottom
-        Positioned(
-          bottom: -80,
-          left: 80,
-          child: _Orb(color: AppTheme.coral, size: 220),
         ),
         // Content layer
         child,

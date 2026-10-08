@@ -127,6 +127,7 @@ class _HealthScoreCard extends StatelessWidget {
     final score = HealthPipeline.calculateScore(markers, latest, symptoms).round();
 
     return LiquidGlassCard(
+      useBlur: true,
       borderRadius: 24,
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -201,8 +202,9 @@ class _ActivityChartCard extends StatelessWidget {
             height: 130,
             child: data.isEmpty
                 ? const Center(child: Text('Нет данных', style: TextStyle(color: Colors.white38)))
-                : LineChart(
-                    LineChartData(
+                : RepaintBoundary(
+                    child: LineChart(
+                      LineChartData(
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: false,
@@ -241,6 +243,7 @@ class _ActivityChartCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
           ),
         ],
       ),
