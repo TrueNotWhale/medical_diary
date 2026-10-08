@@ -21,6 +21,7 @@ class HomeCubit extends Cubit<HomeState> {
       final analyses = await _db.getAnalyses();
       final activity = await _db.getActivity();
       emit(HomeLoaded(
+        allSymptoms: symptoms,
         recentSymptoms: symptoms.take(3).toList(),
         analyses: analyses,
         activityData: activity,

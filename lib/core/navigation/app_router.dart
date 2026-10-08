@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../features/home/view/home_screen.dart';
+import '../../features/main/view/main_screen.dart';
 import '../../features/symptoms/view/symptom_screen.dart';
 import '../../features/scanner/view/scanner_screen.dart';
 import '../../features/analysis/view/analysis_screen.dart';
@@ -15,7 +15,7 @@ class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case home:
-        return _fade(const HomeScreen());
+        return _fade(const MainScreen());
       case symptoms:
         return _fade(const SymptomScreen());
       case scanner:
@@ -26,7 +26,7 @@ class AppRouter {
       case activity:
         return _fade(const ActivityScreen());
       default:
-        return _fade(const HomeScreen());
+        return _fade(const MainScreen());
     }
   }
 

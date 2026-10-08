@@ -2,77 +2,79 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import '../models/analysis_model.dart';
 import '../models/activity_model.dart';
+import '../models/symptom_model.dart';
 
-/// Combined health data state emitted by the pipeline.
 class HealthSnapshot {
   final List<MarkerModel> markers;
   final ActivityModel? latestActivity;
+  final List<SymptomModel> symptoms;
   final int abnormalCount;
-  final double healthScore; // 0-100
+  final double healthScore;
 
   const HealthSnapshot({
     required this.markers,
     this.latestActivity,
+    this.symptoms = const [],
     required this.abnormalCount,
     required this.healthScore,
   });
 }
 
-/// Reactive pipeline combining marker data and activity data into a
-/// [HealthSnapshot] stream via RxDart combineLatest2.
-///
-/// Stream<List<MarkerModel>>  (from OCR / DB)
-/// +
-/// Stream<ActivityModel?>     (from sensor / DB)
-/// ──▶ Stream<HealthSnapshot>
 class HealthPipeline {
-  final _markerController =
-      BehaviorSubject<List<MarkerModel>>.seeded([]);
-  final _activityController =
-      BehaviorSubject<ActivityModel?>.seeded(null);
+  final _markerController = BehaviorSubject<List<MarkerModel>>.seeded([]);
+  final _activityController = BehaviorSubject<ActivityModel?>.seeded(null);
+  final _symptomController = BehaviorSubject<List<SymptomModel>>.seeded([]);
 
   late final Stream<HealthSnapshot> snapshotStream;
 
   HealthPipeline() {
-    snapshotStream =
-        Rx.combineLatest2<List<MarkerModel>, ActivityModel?, HealthSnapshot>(
+    snapshotStream = Rx.combineLatest3<List<MarkerModel>, ActivityModel?, List<SymptomModel>, HealthSnapshot>(
       _markerController.stream,
       _activityController.stream,
-      (markers, activity) {
-        // Count out-of-norm markers
+      _symptomController.stream,
+      (markers, activity, symptoms) {
         final abnormal = markers.where((m) => m.isOutOfNorm).length;
-
-        // Marker score: proportion of normal markers contributes up to 70 pts
-        final markerScore = markers.isEmpty
-            ? 100.0
-            : ((markers.length - abnormal) / markers.length * 70);
-
-        // Activity score: ≥ 8000 steps → full 30 pts
-        final activityScore = activity != null
-            ? (activity.steps >= 8000
-                ? 30.0
-                : activity.steps / 8000 * 30)
-            : 15.0;
-
         return HealthSnapshot(
           markers: markers,
           latestActivity: activity,
+          symptoms: symptoms,
           abnormalCount: abnormal,
-          healthScore:
-              (markerScore + activityScore).clamp(0.0, 100.0),
+          healthScore: calculateScore(markers, activity, symptoms),
         );
       },
     ).asBroadcastStream();
   }
 
-  void updateMarkers(List<MarkerModel> markers) =>
-      _markerController.add(markers);
+  static double calculateScore(List<MarkerModel> markers, ActivityModel? activity, List<SymptomModel> symptoms) {
+    final abnormal = markers.where((m) => m.isOutOfNorm).length;
+    
+    // Markers: 50%
+    final markerScore = markers.isEmpty
+        ? 50.0
+        : ((markers.length - abnormal) / markers.length * 50);
 
-  void updateActivity(ActivityModel activity) =>
-      _activityController.add(activity);
+    // Activity: 30%
+    final activityScore = activity != null
+        ? (activity.steps >= 8000 ? 30.0 : activity.steps / 8000 * 30)
+        : 15.0;
+
+    // Symptoms: 20% (deduct points for severe symptoms)
+    double symptomScore = 20.0;
+    for (final s in symptoms) {
+      symptomScore -= s.severity; // deduct 1-5 points per symptom
+    }
+    if (symptomScore < 0) symptomScore = 0;
+
+    return (markerScore + activityScore + symptomScore).clamp(0.0, 100.0);
+  }
+
+  void updateMarkers(List<MarkerModel> markers) => _markerController.add(markers);
+  void updateActivity(ActivityModel activity) => _activityController.add(activity);
+  void updateSymptoms(List<SymptomModel> symptoms) => _symptomController.add(symptoms);
 
   void dispose() {
     _markerController.close();
     _activityController.close();
+    _symptomController.close();
   }
 }

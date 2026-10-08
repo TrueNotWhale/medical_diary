@@ -32,15 +32,15 @@ class ScannerCubit extends Cubit<ScannerState> {
     try {
       final parser = OcrParser(_realm);
       final markers = parser.parse(_mockOcrText, isMale: isMale);
-      emit(ScannerResult(markers));
+      emit(ScannerResult(markers: markers, rawText: _mockOcrText));
     } catch (e) {
       emit(ScannerError(e.toString()));
     }
   }
 
   /// Persists the parsed markers as an analysis record in SQLite.
-  Future<void> saveResult(
-      String labName, List<MarkerModel> markers) async {
+  Future<void> saveResult({
+      required String labName, required List<MarkerModel> markers}) async {
     try {
       final analysis = AnalysisModel(
         labName: labName,

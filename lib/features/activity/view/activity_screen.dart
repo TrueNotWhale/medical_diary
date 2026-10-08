@@ -13,22 +13,17 @@ class ActivityScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDark,
+      backgroundColor: Colors.transparent, // Background handled by MainScreen or GlowingOrbs
       body: GlowingOrbsBackground(
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white70),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Активность',
                       style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                     ),

@@ -22,8 +22,6 @@ dependencies:
   path: ^1.9.1
 
   # Database – NoSQL (Realm)
-  realm: ^20.0.0
-
   # Charts
   fl_chart: ^0.71.0
 
@@ -51,3 +49,6 @@ flutter:
   assets:
     - assets/mock/
     - assets/images/
+
+dependency_overrides:
+  camera_android_camerax: ^0.7.5

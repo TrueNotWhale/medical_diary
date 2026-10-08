@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/scanner_cubit.dart';
+import '../../main/cubit/main_cubit.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/analysis_model.dart';
 import '../../../shared/widgets/liquid_glass_card.dart';
@@ -13,22 +14,17 @@ class ScannerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bgDark,
+      backgroundColor: Colors.transparent, // Background handled by MainScreen or GlowingOrbs
       body: GlowingOrbsBackground(
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white70),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Сканер бланков',
                       style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                     ),
@@ -42,7 +38,7 @@ class ScannerScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Анализ сохранён'), backgroundColor: AppTheme.emerald),
                       );
-                      Navigator.pushReplacementNamed(context, AppRouter.home);
+                      context.read<MainCubit>().setTab(0); // Return to home tab
                     }
                   },
                   builder: (context, state) {
@@ -293,7 +289,6 @@ class _MarkerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAbove = marker.isAboveNorm;
-    final isBelow = marker.isBelowNorm;
     final isNormal = !marker.isOutOfNorm;
 
     Color cardColor;

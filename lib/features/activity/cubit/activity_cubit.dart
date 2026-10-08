@@ -21,10 +21,18 @@ class ActivityCubit extends Cubit<ActivityState> {
     emit(ActivityLoading());
     try {
       final activityList = await _db.getActivity(limit: 14);
+      final analyses = await _db.getAnalyses();
+      final symptoms = await _db.getSymptoms();
 
-      // Feed latest activity into the reactive pipeline
+      // Feed data into the reactive pipeline
       if (activityList.isNotEmpty) {
         _pipeline.updateActivity(activityList.first);
+      }
+      if (analyses.isNotEmpty) {
+        _pipeline.updateMarkers(analyses.first.markers);
+      }
+      if (symptoms.isNotEmpty) {
+        _pipeline.updateSymptoms(symptoms);
       }
 
       // Subscribe to the combined health snapshot stream
@@ -40,12 +48,15 @@ class ActivityCubit extends Cubit<ActivityState> {
       emit(ActivityLoaded(
         activityList: activityList,
         snapshot: HealthSnapshot(
-          markers: const [],
+          markers: analyses.isNotEmpty ? analyses.first.markers : const [],
           latestActivity: activityList.isNotEmpty ? activityList.first : null,
-          abnormalCount: 0,
-          healthScore: activityList.isNotEmpty
-              ? (activityList.first.steps / 10000 * 100).clamp(0, 100)
-              : 50,
+          symptoms: symptoms,
+          abnormalCount: analyses.isNotEmpty ? analyses.first.markers.where((m) => m.isOutOfNorm).length : 0,
+          healthScore: HealthPipeline.calculateScore(
+            analyses.isNotEmpty ? analyses.first.markers : const [],
+            activityList.isNotEmpty ? activityList.first : null,
+            symptoms,
+          ),
         ),
       ));
     } catch (e) {
