@@ -1,0 +1,53 @@
+name: medical_diary
+description: "Мобильный медицинский дневник со сканером лабораторных анализов"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # BLoC / State Management
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.7
+
+  # Database – relational
+  sqflite: ^2.4.1
+  path: ^1.9.1
+
+  # Database – NoSQL (Realm)
+  realm: ^20.0.0
+
+  # Charts
+  fl_chart: ^0.71.0
+
+  # Camera & OCR
+  camera: ^0.11.1
+  google_mlkit_text_recognition: ^0.15.0
+
+  # Reactive streams
+  rxdart: ^0.28.0
+
+  # Image handling
+  image_picker: ^1.1.2
+
+  # Date/time formatting
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/mock/
+    - assets/images/
